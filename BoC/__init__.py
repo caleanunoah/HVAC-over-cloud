@@ -187,6 +187,7 @@ def graph_ppm(samples, graph_y):
     plt.title("PPM Measured for " + str(samples) + " samples")
     plt.show()
 
+
 #########################
 #  Class definitions
 #########################

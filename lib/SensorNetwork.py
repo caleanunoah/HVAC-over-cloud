@@ -1,7 +1,7 @@
 import BAC0
 import uuid
 import json
-import Sensor
+from .Sensor import BacnetSensor, AnalogCurrentSensor, AnalogVoltageSensor
 
 class InformalSensorNetworkInterface:
     def __init__(self):
@@ -24,23 +24,15 @@ class BacnetSensorNetwork(InformalSensorNetworkInterface):
     def __init__(self):
         super().__init__()
         self.protocol = "BACN"
-
-    def initializeNetwork(self, local_ipv4_addr, bacnet_read_port, bacnet_intialize_port):
-        self.local_ipv4_addr = local_ipv4_addr
-        self.bacnet_read_port = bacnet_read_port
-        self.data = {}
-        self.bacnet = BAC0.lite(ip=self.local_ipv4_addr, port=bacnet_intialize_port)
-        return self.bacnet
+        self.sensors = []
 
     def displaySensors(self):
         print("\nDisplaying all sensors in network: ")
         for sensor in self.sensors:
             print("\t" + sensor)
 
-    def addSensors(self):
-        id = str(uuid.uuid4())
-        self.sensors[id] = Sensor.BacnetSensor()
-        print("Added bacnet sensor with ID: " + id)
+    def addSensors(self, sensor):
+        self.sensors.append(sensor)
 
     def removeSensors(self, id):
         pass
@@ -59,7 +51,7 @@ class AnalogVoltageSensorNetwork(InformalSensorNetworkInterface):
 
     def addSensors(self):
         id = str(uuid.uuid4())
-        self.sensors[id] = Sensor.AnalogVoltageSensor()
+        self.sensors[id] = AnalogVoltageSensor()
         print("Added voltage sensor with ID: " + id)
 
     def removeSensors(self):
@@ -79,7 +71,7 @@ class AnalogCurrentSensorNetwork(InformalSensorNetworkInterface):
 
     def addSensors(self):
         id = str(uuid.uuid4())
-        self.sensors[id] = Sensor.AnalogCurrentSensor()
+        self.sensors[id] = AnalogCurrentSensor()
         print("Added current sensor with ID: " + id)
 
     def removeSensors(self):

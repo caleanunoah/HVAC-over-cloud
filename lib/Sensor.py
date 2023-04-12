@@ -15,8 +15,13 @@ class InformalSensorInterface:
         return a+b
 
 class BacnetSensor(InformalSensorInterface):
-    def __init__(self):
+    def __init__(self, local_ipv4_addr, bacnet_read_port, bacnet_intialize_port):
         super().__init__()
+        self.local_ipv4_addr = local_ipv4_addr
+        self.bacnet_read_port = bacnet_read_port
+        self.data = {}
+        self.bacnet = BAC0.lite(ip=self.local_ipv4_addr, port=bacnet_intialize_port)
+
 
     def read(self, ip, n):
         """
