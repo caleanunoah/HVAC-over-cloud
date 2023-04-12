@@ -38,7 +38,8 @@ class DB:
 
         return self.res
 
-    def close(self):
+    def terminate(self):
+        self.cursor.close()
         self.cnx.close()
 
 

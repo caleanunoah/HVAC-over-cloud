@@ -1,11 +1,13 @@
 import BAC0
 import uuid
+import time
 import json
-from .Sensor import BacnetSensor, AnalogCurrentSensor, AnalogVoltageSensor
+from lib.Sensor import BacnetSensor, AnalogCurrentSensor, AnalogVoltageSensor
 
 class InformalSensorNetworkInterface:
     def __init__(self):
-        self.sensors = {}
+        self.sensors = []
+        self.data = {}
 
     def initializeNetwork(self):
         pass
@@ -24,7 +26,6 @@ class BacnetSensorNetwork(InformalSensorNetworkInterface):
     def __init__(self):
         super().__init__()
         self.protocol = "BACN"
-        self.sensors = []
 
     def displaySensors(self):
         print("\nDisplaying all sensors in network: ")
@@ -33,6 +34,12 @@ class BacnetSensorNetwork(InformalSensorNetworkInterface):
 
     def addSensors(self, sensor):
         self.sensors.append(sensor)
+
+    def readAll(self, ip, n):
+        for sensor in self.sensors:
+            self.data = sensor.read(ip, n)
+        return self.data
+
 
     def removeSensors(self, id):
         pass
@@ -49,10 +56,8 @@ class AnalogVoltageSensorNetwork(InformalSensorNetworkInterface):
     def displaySensors(self):
         pass
 
-    def addSensors(self):
-        id = str(uuid.uuid4())
-        self.sensors[id] = AnalogVoltageSensor()
-        print("Added voltage sensor with ID: " + id)
+    def addSensors(self, sensor):
+        self.sensors.append(sensor)
 
     def removeSensors(self):
         pass
@@ -69,26 +74,23 @@ class AnalogCurrentSensorNetwork(InformalSensorNetworkInterface):
     def displaySensors(self):
         pass
 
-    def addSensors(self):
-        id = str(uuid.uuid4())
-        self.sensors[id] = AnalogCurrentSensor()
-        print("Added current sensor with ID: " + id)
+    def addSensors(self, sensor):
+        self.sensors.append(sensor)
 
     def removeSensors(self):
         pass
 
 
 if __name__ == "__main__":
-    bacnet_network = BacnetSensorNetwork()
-    bacnet_network.initializeNetwork("192.168.1.80", "47808", "47808")
-    print(bacnet_network.protocol)
-    print(bacnet_network.sensors)
+    local_ipv4_addr = "192.168.1.80"
+    bacnet_read_port = "47808"
+    bacnet_intialize_port = "47808"
 
-    bacnet_network.addSensors()
-    bacnet_network.addSensors()
-    bacnet_network.addSensors()
+    BN = BacnetSensorNetwork()
+    SN1 = BacnetSensor(local_ipv4_addr=local_ipv4_addr, bacnet_read_port=bacnet_read_port, bacnet_intialize_port=bacnet_intialize_port)
 
-    bacnet_network.displaySensors()
+    BN.addSensors(SN1)
 
+    BN.readAll(ip="192.168.1.254", n=[513])
 
-    #print(bac.read("192.168.1.254", [513]))
+    time.sleep(1)
