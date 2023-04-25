@@ -40,7 +40,7 @@ if __name__ == '__main__':
     print("\nReading now.....")
     value = bacnet.read("192.168.1.72/24" + ":" + "47808" + " analogInput " + "513" + " presentValue")
     print(value)
-
+    # https://github.com/caleanunoah/HVAC-over-cloud.git
 
 
 
