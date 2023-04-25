@@ -1,9 +1,10 @@
+import dotenv
 import mysql.connector
 from mysql.connector import Error
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+#from dotenv import load_dotenv
+#load_dotenv()
 
 class DB:
     # TODO Implement Error handling [https://peps.python.org/pep-0249/#exceptions]
@@ -21,10 +22,11 @@ class DB:
         }
 
     def connect(self):
-        self.cnx = mysql.connector.connect(user=os.getenv("USER"),
-                                   password=os.getenv("PASS"),
-                                   host=os.getenv("ENDPOINT"),
-                                   database=os.getenv("NAME"))
+        self.cnx = mysql.connector.connect(user="Operator",
+                                   password="Lemonhead2021",
+                                   host="operator.c2rajj5udvbg.us-west-2.rds.amazonaws.com",
+                                   database="Operator_sites")
+
         self.cursor = self.cnx.cursor()
         return self.cursor
 
