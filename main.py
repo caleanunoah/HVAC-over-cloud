@@ -1,6 +1,8 @@
 import datetime
 import json
 import time
+import uuid
+
 import boto3
 import BoC
 import BAC0
@@ -31,16 +33,37 @@ mode = 'w'
 SAMPLE_PERIOD_S = 1                                        # Sample period (seconds)
 samples = 10
 
+def get_data(bacnet):
+    return {
+        'event_time': datetime.datetime.now().isoformat(),
+        'rlds_ID': "rid_123",
+        'sensor_ID': 'sid_1',
+        'ppm': bacnet.read("192.168.1.72/24" + ":" + "47808" + " analogInput " + "513" + " presentValue"),
+        'alarm_status': 'inactive'
+    }
+
+def generate(stream_name, kinesis_client, bacnet):
+    while True:
+        data = get_data(bacnet)
+        print(data)
+        time.sleep(60)
+        kinesis_client.put_record(
+            StreamName=stream_name,
+            Data=json.dumps(data),
+            PartitionKey='partitionkey')
 
 if __name__ == '__main__':
     bacnet = BAC0.lite(ip="192.168.1.75/24", port="47808")
-    bacnet.whois()
+    bacnet.whois()  # Prints 301C's IPv4 192.168.1.72
+    STREAM_NAME = "OrangePi"
 
     print(bacnet.devices)
-    print("\nReading now.....")
-    value = bacnet.read("192.168.1.72/24" + ":" + "47808" + " analogInput " + "513" + " presentValue")
-    print(value)
-    # https://github.com/caleanunoah/HVAC-over-cloud.git
+
+    #value = bacnet.read("192.168.1.72/24" + ":" + "47808" + " analogInput " + "513" + " presentValue")
+    #print(value)
+    k_client = boto3.client('kinesis', region_name='us-west-2')
+    print("Client Resource to Kinesis successfully created")
+    generate(stream_name=STREAM_NAME, kinesis_client=k_client, bacnet=bacnet)
 
 
 
