@@ -5,7 +5,8 @@ HVAC-over-cloud is software running as an embedded device within a sensor networ
 
 ## Navigating Repo
 
-*./lib > __init__.py* holds many network connection paramers
+**./lib > __init__.py**  holds many network connection paramers
+**main.py**  Program entry point
 
 ## How to Use
 1. Flash OS onto OP5 [link](http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-pi-5.html)
