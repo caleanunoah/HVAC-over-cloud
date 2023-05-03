@@ -15,7 +15,7 @@ matplotlib.rc('xtick', labelsize=20)
 matplotlib.rc('ytick', labelsize=20)
 plt.rcParams.update({'font.size': 25})
 
-#import lib
+import lib
 #import BoC
 
 from lib.DB import DB
@@ -27,6 +27,7 @@ fig = plt.figure()
 ax1 = fig.add_subplot(1, 1, 1)
 xs = []
 ys = []
+
 
 
 def animate(i, xs, ys):
@@ -57,8 +58,9 @@ def get_data(bacnet):
         'event_time': datetime.datetime.now().isoformat(),
         'rlds_ID': "rid_123",
         'sensor_ID': 'sid_1',
-        'ppm': bacnet.read("192.168.1.72/24" + ":" + "47808" + " analogInput " + "513" + " presentValue"),
-        'alarm_status': 'inactive'
+        'ppm': bacnet.read(lib.honeywell_301C_ipv4_addr + ":" + lib.BAC0_port + " analogInput " + lib.OBJ_ID_PPM[0] + " presentValue"),
+        'ppm_status_flags': bacnet.read(lib.honeywell_301C_ipv4_addr + ":" + lib.BAC0_port + " analogInput " + lib.OBJ_ID_PPM[0] + " statusFlags"),
+        'ppm_reliability': bacnet.read(lib.honeywell_301C_ipv4_addr + ":" + lib.BAC0_port + " analogInput " + lib.OBJ_ID_PPM[0] + " reliability"),
     }
 
 def generate(stream_name, kinesis_client, bacnet):
@@ -74,10 +76,8 @@ def generate(stream_name, kinesis_client, bacnet):
 
 if __name__ == '__main__':
 
-    ip_pc = "192.168.1.70/24"
-    ip_orangepi = "192.168.1.75/24"
 
-    bacnet = BAC0.lite(ip=ip_pc, port="47808")
+    bacnet = BAC0.lite(ip=lib.ipv4_pc, port="47808")
     bacnet.whois()  # Prints 301C's IPv4 192.168.1.72
     print(bacnet.devices)
 
