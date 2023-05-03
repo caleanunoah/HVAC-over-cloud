@@ -23,7 +23,6 @@ from lib.Sensor import BacnetSensor, AnalogVoltageSensor, AnalogCurrentSensor
 from lib.SensorNetwork import BacnetSensorNetwork, AnalogVoltageSensorNetwork, AnalogCurrentSensorNetwork
 
 
-<<<<<<< HEAD
 fig = plt.figure()
 ax1 = fig.add_subplot(1, 1, 1)
 xs = []
@@ -54,10 +53,6 @@ def animate(i, xs, ys):
 
 def get_data(bacnet):
     dt = datetime.datetime.now(pytz.timezone('Canada/Pacific')).isoformat()
-
-=======
-def get_data(bacnet):
->>>>>>> b039b390ce15e3af4baeafcafade1955f3af9f16
     return {
         'event_time': datetime.datetime.now().isoformat(),
         'rlds_ID': "rid_123",
@@ -70,23 +65,20 @@ def generate(stream_name, kinesis_client, bacnet):
     while True:
         data = get_data(bacnet)
         print(data)
-<<<<<<< HEAD
 
-        plt.show()
         time.sleep(60)
-
-=======
-        time.sleep(60)
->>>>>>> b039b390ce15e3af4baeafcafade1955f3af9f16
         kinesis_client.put_record(
             StreamName=stream_name,
             Data=json.dumps(data),
             PartitionKey='partitionkey')
 
 if __name__ == '__main__':
-    bacnet = BAC0.lite(ip="192.168.1.75/24", port="47808")
+
+    ip_pc = "192.168.1.70/24"
+    ip_orangepi = "192.168.1.75/24"
+
+    bacnet = BAC0.lite(ip=ip_pc, port="47808")
     bacnet.whois()  # Prints 301C's IPv4 192.168.1.72
-<<<<<<< HEAD
     print(bacnet.devices)
 
     #ani = animation.FuncAnimation(fig, animate, fargs=(xs, ys), interval=3000)
@@ -99,17 +91,7 @@ if __name__ == '__main__':
              kinesis_client=boto3.client('kinesis', region_name='us-west-2'),
              bacnet=bacnet)
 
-=======
-    STREAM_NAME = "OrangePi"
 
-    print(bacnet.devices)
-
-    #value = bacnet.read("192.168.1.72/24" + ":" + "47808" + " analogInput " + "513" + " presentValue")
-    #print(value)
-    k_client = boto3.client('kinesis', region_name='us-west-2')
-    print("Client Resource to Kinesis successfully created")
-    generate(stream_name=STREAM_NAME, kinesis_client=k_client, bacnet=bacnet)
->>>>>>> b039b390ce15e3af4baeafcafade1955f3af9f16
 
 
 
