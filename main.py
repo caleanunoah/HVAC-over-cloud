@@ -1,46 +1,93 @@
 import datetime
+import pytz
 import json
 import time
 import boto3
-import BoC
+import sys
 import BAC0
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+matplotlib.rc('xtick', labelsize=20)
+matplotlib.rc('ytick', labelsize=20)
+plt.rcParams.update({'font.size': 25})
+
+#import lib
+#import BoC
+
 from lib.DB import DB
 from lib.Sensor import BacnetSensor, AnalogVoltageSensor, AnalogCurrentSensor
 from lib.SensorNetwork import BacnetSensorNetwork, AnalogVoltageSensorNetwork, AnalogCurrentSensorNetwork
 
-# Define some constants
-# TODO: Move this outside of code and store each buildings IP/Honeywell device IP info separately
-local_ipv4_addr = "192.168.1.70/24"                      # IPv4 Address - local machine's Wireless LAN
-honeywell_301C_ipv4_addr = "192.168.1.254"               # IPv4 Address - Honeywell 301C Controller - IPv4 address
-ethernet_ipv4_addr = "192.168.1.80/24"                   # IPv4 Address - Ethernet switch (type = managed)
-yabe_room_sim_port = "55481"                             # YABE generates port for simulation (new # each time ROOM SIM is started)
-BAC0_port = "47808"                                      # This is a defined in BACnet as the port #
-BAC0_port_sim = "47809"
-MAX_SAMPLE_PERIOD = 720                                  # Max sample period (seconds)
-OBJ_ID_PPM = [513]                                       # BACnet ID of PPM reading found using (YABE: https://sourceforge.net/projects/yetanotherbacnetexplorer/)
-OBJ_ID_BUZZ = [46360]                                       # BACnet ID of PPM reading found using (YABE: https://sourceforge.net/projects/yetanotherbacnetexplorer/)
-OBJ_ID_SIM = [0]
-data = {}
-MAX_FILE_SIZE = 4*1024*1024                             # File size maximum (4 MB)
 
-# Parameters that the user will provide implicitly or explicitly
-# TODO Get params from user instead of hardcode
-floor = 40
-room = 50
-mode = 'w'
-SAMPLE_PERIOD_S = 1                                        # Sample period (seconds)
-samples = 10
+fig = plt.figure()
+ax1 = fig.add_subplot(1, 1, 1)
+xs = []
+ys = []
 
+
+def animate(i, xs, ys):
+    """
+    Credit to Author SHAWN HYMEL [https://learn.sparkfun.com/tutorials/graph-sensor-data-with-python-and-matplotlib/update-a-graph-in-real-time]
+    """
+    data = get_data(bacnet)
+    print(data['ppm'])
+
+    ys.append(float(data['ppm']))
+    xs.append(datetime.datetime.now().strftime('%H:%M:%S'))
+
+    xs = xs[-20:]
+    ys = ys[-20:]
+
+    ax1.clear()
+    ax1.plot(xs, ys)
+
+    plt.xlabel('Event Time')
+    plt.ylabel('PPM')
+    plt.title('Live graph of PPM')
+    plt.xticks(rotation=45, ha='right')
+    plt.subplots_adjust(bottom=0.30)
+
+def get_data(bacnet):
+    dt = datetime.datetime.now(pytz.timezone('Canada/Pacific')).isoformat()
+
+    return {
+        'event_time': datetime.datetime.now().isoformat(),
+        'rlds_ID': "rid_123",
+        'sensor_ID': 'sid_1',
+        'ppm': bacnet.read("192.168.1.72/24" + ":" + "47808" + " analogInput " + "513" + " presentValue"),
+        'alarm_status': 'inactive'
+    }
+
+def generate(stream_name, kinesis_client, bacnet):
+    while True:
+        data = get_data(bacnet)
+        print(data)
+
+        plt.show()
+        time.sleep(60)
+
+        kinesis_client.put_record(
+            StreamName=stream_name,
+            Data=json.dumps(data),
+            PartitionKey='partitionkey')
 
 if __name__ == '__main__':
     bacnet = BAC0.lite(ip="192.168.1.75/24", port="47808")
-    bacnet.whois()
-
+    bacnet.whois()  # Prints 301C's IPv4 192.168.1.72
     print(bacnet.devices)
-    print("\nReading now.....")
-    value = bacnet.read("192.168.1.72/24" + ":" + "47808" + " analogInput " + "513" + " presentValue")
-    print(value)
-    # https://github.com/caleanunoah/HVAC-over-cloud.git
+
+    #ani = animation.FuncAnimation(fig, animate, fargs=(xs, ys), interval=3000)
+    #plt.show()
+
+    print("Client Resource to Kinesis successfully created")
+
+    time.sleep(1)
+    generate(stream_name="OrangePi",
+             kinesis_client=boto3.client('kinesis', region_name='us-west-2'),
+             bacnet=bacnet)
+
 
 
 
