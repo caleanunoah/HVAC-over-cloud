@@ -11,9 +11,9 @@ HVAC-over-cloud is software running as an embedded device within a sensor networ
 3. Install Pycharm or equivalent IDE
    > Python 3.8 or higher
 4. Install git bash 
-5. Open git bash & run cmd (with [repo-https-link](https://github.com/caleanunoah/HVAC-over-cloud))
+5. Open git bash & run cmd (with [repo-link](https://github.com/caleanunoah/HVAC-over-cloud))
     ```commandline
-    git clone [repo-https-link]
+    git clone repo-link
     cd hvac-over-cloud
    ```
 6. Open shell and run cmd
