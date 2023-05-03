@@ -169,7 +169,7 @@ def display_bacnet_connection(bacnet):
     bacnet.whois()
     print("\nBACNET Devices: ")
     print(bacnet.devices)               # All devices on the network
-    #myController = bacnet.devices[0]
+    #myController = bacnet_cnx.devices[0]
     #print("\nController ")
     #print(myController[0])              # 301C Controller
 
@@ -208,7 +208,7 @@ class RLDS:
 
     def readPPM(self, ip, n):
             """
-            @param bacnet: BACnet connection
+            @param bacnet_cnx: BACnet connection
             @param n: list of Object IDs to read from.
             @param local_ip_addr: # local machine's wireless LAN ipv4 address
             @param yabe_virtual_port: # YABE generates port for simulation (new # for new simulation)

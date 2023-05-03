@@ -25,7 +25,7 @@ class BacnetSensor(InformalSensorInterface):
 
     def read(self, ip, n):
         """
-        @param bacnet: BACnet connection
+        @param bacnet_cnx: BACnet connection
         @param n: list of Object IDs to read from.
         @param local_ip_addr: # local machine's wireless LAN ipv4 address
         @param yabe_virtual_port: # YABE generates port for simulation (new # for new simulation)

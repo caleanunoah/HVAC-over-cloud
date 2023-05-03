@@ -18,16 +18,10 @@ plt.rcParams.update({'font.size': 25})
 import lib
 #import BoC
 
-from lib.DB import DB
-from lib.Sensor import BacnetSensor, AnalogVoltageSensor, AnalogCurrentSensor
-from lib.SensorNetwork import BacnetSensorNetwork, AnalogVoltageSensorNetwork, AnalogCurrentSensorNetwork
-
-
 fig = plt.figure()
 ax1 = fig.add_subplot(1, 1, 1)
 xs = []
 ys = []
-
 
 
 def animate(i, xs, ys):
@@ -52,20 +46,19 @@ def animate(i, xs, ys):
     plt.xticks(rotation=45, ha='right')
     plt.subplots_adjust(bottom=0.30)
 
-def get_data(bacnet):
+def get_data(bacnet_cnx):
     dt = datetime.datetime.now(pytz.timezone('Canada/Pacific')).isoformat()
     return {
         'event_time': datetime.datetime.now().isoformat(),
         'rlds_ID': "rid_123",
         'sensor_ID': 'sid_1',
-        'ppm': bacnet.read(lib.honeywell_301C_ipv4_addr + ":" + lib.BAC0_port + " analogInput " + lib.OBJ_ID_PPM[0] + " presentValue"),
-        'ppm_status_flags': bacnet.read(lib.honeywell_301C_ipv4_addr + ":" + lib.BAC0_port + " analogInput " + lib.OBJ_ID_PPM[0] + " statusFlags"),
-        'ppm_reliability': bacnet.read(lib.honeywell_301C_ipv4_addr + ":" + lib.BAC0_port + " analogInput " + lib.OBJ_ID_PPM[0] + " reliability"),
+        'ppm': bacnet_cnx.read(lib.honeywell_301C_ipv4_addr + ":" + lib.BAC0_port + " analogInput " + lib.OBJ_ID_PPM[0] + " presentValue"),
+        'ppm_status_flags': bacnet_cnx.read(lib.honeywell_301C_ipv4_addr + ":" + lib.BAC0_port + " analogInput " + lib.OBJ_ID_PPM[0] + " statusFlags")
     }
 
-def generate(stream_name, kinesis_client, bacnet):
+def generate(stream_name, kinesis_client, bacnet_cnx):
     while True:
-        data = get_data(bacnet)
+        data = get_data(bacnet_cnx)
         print(data)
 
         time.sleep(60)
@@ -74,8 +67,8 @@ def generate(stream_name, kinesis_client, bacnet):
             Data=json.dumps(data),
             PartitionKey='partitionkey')
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
 
     bacnet = BAC0.lite(ip=lib.ipv4_pc, port="47808")
     bacnet.whois()  # Prints 301C's IPv4 192.168.1.72
@@ -84,12 +77,9 @@ if __name__ == '__main__':
     #ani = animation.FuncAnimation(fig, animate, fargs=(xs, ys), interval=3000)
     #plt.show()
 
-    print("Client Resource to Kinesis successfully created")
-
-    time.sleep(1)
     generate(stream_name="OrangePi",
              kinesis_client=boto3.client('kinesis', region_name='us-west-2'),
-             bacnet=bacnet)
+             bacnet_cnx=bacnet)
 
 
 
