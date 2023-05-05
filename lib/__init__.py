@@ -1,6 +1,7 @@
 local_ipv4_addr = "192.168.1.70/24"                      # IPv4 Address - local machine's Wireless LAN
 honeywell_301C_ipv4_addr = "192.168.1.72"               # IPv4 Address - Honeywell 301C Controller
 ethernet_ipv4_addr = "192.168.1.80/24"                   # IPv4 Address - Ethernet switch
+
 ipv4_pc = "192.168.1.70/24"
 ipv4_orangepi = "192.168.1.75/24"
 

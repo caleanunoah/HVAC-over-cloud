@@ -46,6 +46,7 @@ def animate(i, xs, ys):
     plt.xticks(rotation=45, ha='right')
     plt.subplots_adjust(bottom=0.30)
 
+
 def get_data(bacnet_cnx):
     dt = datetime.datetime.now(pytz.timezone('Canada/Pacific')).isoformat()
     return {
@@ -62,6 +63,7 @@ def generate(stream_name, kinesis_client, bacnet_cnx):
         print(data)
 
         time.sleep(60)
+
         kinesis_client.put_record(
             StreamName=stream_name,
             Data=json.dumps(data),
@@ -70,20 +72,34 @@ def generate(stream_name, kinesis_client, bacnet_cnx):
 
 if __name__ == '__main__':
 
-    bacnet = BAC0.lite(ip=lib.ipv4_pc, port="47808")
+    bacnet = BAC0.lite(ip=lib.ipv4_orangepi, port="47808")
     bacnet.whois()  # Prints 301C's IPv4 192.168.1.72
     print(bacnet.devices)
 
     #ani = animation.FuncAnimation(fig, animate, fargs=(xs, ys), interval=3000)
     #plt.show()
 
+    # ONLINE
+    '''
     generate(stream_name="OrangePi",
              kinesis_client=boto3.client('kinesis', region_name='us-west-2'),
              bacnet_cnx=bacnet)
+    '''
 
+    # OFFLINE
+    while True:
+        local_data = json.dumps(get_data(bacnet), indent=2)
+        print(local_data)
+        
+        f = open("local_database.txt", "a")
+        f.write(local_data)
+        f.close()
+        # open and read the file after the appending:
+        f = open("local_database.txt", "r")
+        print(f.read())
+        f.close()
 
-
-
+        time.sleep(60)
 
 
 

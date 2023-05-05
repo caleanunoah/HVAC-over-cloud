@@ -1,0 +1,34 @@
+{
+  "event_time": "2023-05-05T08:10:47.955618",
+  "rlds_ID": "rid_123",
+  "sensor_ID": "sid_1",
+  "ppm": 0.0,
+  "ppm_status_flags": [
+    1,
+    0,
+    0,
+    0
+  ]
+}{
+  "event_time": "2023-05-05T08:24:57.488951",
+  "rlds_ID": "rid_123",
+  "sensor_ID": "sid_1",
+  "ppm": 0.0,
+  "ppm_status_flags": [
+    1,
+    0,
+    0,
+    0
+  ]
+}{
+  "event_time": "2023-05-05T08:25:57.533861",
+  "rlds_ID": "rid_123",
+  "sensor_ID": "sid_1",
+  "ppm": 0.0,
+  "ppm_status_flags": [
+    1,
+    0,
+    0,
+    0
+  ]
+}
