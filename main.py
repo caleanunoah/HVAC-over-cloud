@@ -77,7 +77,7 @@ def generate(stream_name, kinesis_client, bacnet_cnx):
 
 if __name__ == '__main__':
 
-    bacnet = BAC0.lite(ip=lib.ipv4_orangepi, port="47808")
+    bacnet = BAC0.lite(ip=lib.ethernet_ipv4_addr, port=lib.BAC0_port)
     bacnet.whois()  # Prints 301C's IPv4 192.168.1.72
     print(bacnet.devices)
 
