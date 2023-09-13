@@ -1,51 +1,24 @@
-import datetime
-import pytz
-import json
-import time
-import uuid
+try:
+    import sys
+    import datetime
+    import pytz
+    import json
+    import time
+    import uuid
+    import BAC0.core.io.IOExceptions as BACError
+    import random
+    import numpy as np
+    from influxdb_client import InfluxDBClient, Point
+    from influxdb_client.client.write_api import SYNCHRONOUS
+except ImportError as err:
+    print("IMPORT ERROR in one of the 3rd party libraries")
 
-import boto3
-import sys
-import BAC0
-import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-matplotlib.rc('xtick', labelsize=20)
-matplotlib.rc('ytick', labelsize=20)
-plt.rcParams.update({'font.size': 25})
-
-import lib
-#import BoC
-
-fig = plt.figure()
-ax1 = fig.add_subplot(1, 1, 1)
-xs = []
-ys = []
-
-
-def animate(i, xs, ys):
-    """
-    Credit to Author SHAWN HYMEL [https://learn.sparkfun.com/tutorials/graph-sensor-data-with-python-and-matplotlib/update-a-graph-in-real-time]
-    """
-    data = get_data(bacnet)
-    print(data['ppm'])
-
-    ys.append(float(data['ppm']))
-    xs.append(datetime.datetime.now().strftime('%H:%M:%S'))
-
-    xs = xs[-20:]
-    ys = ys[-20:]
-
-    ax1.clear()
-    ax1.plot(xs, ys)
-
-    plt.xlabel('Event Time')
-    plt.ylabel('PPM')
-    plt.title('Live graph of PPM')
-    plt.xticks(rotation=45, ha='right')
-    plt.subplots_adjust(bottom=0.30)
-
+try: # Custom libraries
+    import BAC0
+    import lib
+    #import BoC
+except ImportError as err:
+    print("IMPORT ERROR in one of the custom libraries")
 
 def get_data(bacnet_cnx, device_ID):
     dt = datetime.datetime.now(pytz.timezone('Canada/Pacific')).isoformat()
@@ -60,6 +33,20 @@ def get_data(bacnet_cnx, device_ID):
 
     }
 
+def get_spoof_data(bacnet_cnx, device_ID):
+    dt = datetime.datetime.now(pytz.timezone('Canada/Pacific')).isoformat()
+    return {
+        'event_time': datetime.datetime.now().isoformat(),
+        'rlds_ID': "NEU",
+        'sensor_ID': "f77a9fc0-c3ea-465a-ac6d-5afbdc91e516",
+        'sensor_name': "Sensor1",
+        'ppm': random.randint(0, 1023),
+        'ppm_status_flags': "inactive",
+        'out_of_service': "false",
+
+    }
+
+'''
 def generate(stream_name, kinesis_client, bacnet_cnx):
     while True:
         for id in lib.OBJ_ID_PPM:
@@ -72,26 +59,57 @@ def generate(stream_name, kinesis_client, bacnet_cnx):
                 PartitionKey='partitionkey')
 
         time.sleep(60)
-
+'''
 
 
 if __name__ == '__main__':
+    print("Starting main.py")
 
-    bacnet = BAC0.lite(ip=lib.ethernet_ipv4_addr, port=lib.BAC0_port)
-    bacnet.whois()  # Prints 301C's IPv4 192.168.1.72
-    print(bacnet.devices)
+    try:
+        print("Creating BACnet connection")
+        bacnet = BAC0.lite(ip=lib.ipv4_address, port=lib.BAC0_port)
+        bacnet.whois()  # Prints 301C's IPv4 192.168.1.72
+        #print(bacnet.devices)
+        #time.sleep(1)
+        controller = BAC0.device(address=lib.honeywell_301C_ipv4_addr, device_id=1, network=bacnet)
+        #print(controller.points)
+    except AttributeError as err:
+        print(err)
+        print("\nBACNET Attribute Error. Could not initialize BACnet, check variable names are correctly spelled/declared")
+    except BACError.InitializationError as err:
+        print(err)
+        print("\nBACNET Initialization Error. Check the IP addresses and ports are correct in the ~/lib folder")
 
-    time.sleep(1)
-    #controller = BAC0.device(address=lib.honeywell_301C_ipv4_addr, device_id=1, network=bacnet)
-    #print(controller.points)
-    #ani = animation.FuncAnimation(fig, animate, fargs=(xs, ys), interval=3000)
-    #plt.show()
+    try:
+        for id in lib.OBJ_ID_PPM:
+            data = get_spoof_data(bacnet, id)
+            print(data)
+    except BACError.NoResponseFromController as err:
+        print(err)
+        print("\nNo Response from controller. It is likely the controller that has disconnected. Double check wired connections and IP addressess")
+    except NameError as err:
+        print(err)
+        print("\nName Error. It is likely the BACnet connection did not initialize so when we tried to get data there is nothing called 'bacnet'. Double check the initialization of the BACnet cnx")
 
+    try:
+        bucket = "test-bucket"
+        client = InfluxDBClient(url="http://localhost:8086",
+                                token="K5AKcnKQuQEIZ6dMXwxH2kzd95DNftQLWa6516fJhEAQkD6V_wlcjdd596AywTbniwyMdV2hDUajoV2b6RevDA=="
+                                , org="Operator Technologies")
+        write_api = client.write_api(write_options=SYNCHRONOUS)
+        p = Point("my_measurement").tag("site", data['rlds_ID']).field("ppm", data['ppm'])
+        write_api.write(bucket=bucket, record=p)
+
+    except TypeError as err:
+        pass
+
+    '''
     # ONLINE
 
     generate(stream_name="OrangePi",
              kinesis_client=boto3.client('kinesis', region_name='us-west-2'),
              bacnet_cnx=bacnet)
+    '''
 
     '''
     # OFFLINE
@@ -108,7 +126,7 @@ if __name__ == '__main__':
         f.close()
 
         time.sleep(60)
-'''
+    '''
 
 
 
