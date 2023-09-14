@@ -40,7 +40,7 @@ def get_spoof_data(bacnet_cnx, device_ID):
         'rlds_ID': "NEU",
         'sensor_ID': "f77a9fc0-c3ea-465a-ac6d-5afbdc91e516",
         'sensor_name': "Sensor1",
-        'ppm': random.randint(0, 1023),
+        'ppm': 0,
         'ppm_status_flags': "inactive",
         'out_of_service': "false",
 
