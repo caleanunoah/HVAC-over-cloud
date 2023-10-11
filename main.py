@@ -13,25 +13,33 @@ try:
 except ImportError as err:
     print("IMPORT ERROR in one of the 3rd party libraries")
 
-try: # Custom libraries
+try:  # Custom libraries
     import BAC0
     import lib
-    #import BoC
+    # import BoC
 except ImportError as err:
+    print(err)
     print("IMPORT ERROR in one of the custom libraries")
+
 
 def get_data(bacnet_cnx, device_ID):
     dt = datetime.datetime.now(pytz.timezone('Canada/Pacific')).isoformat()
     return {
         'event_time': datetime.datetime.now().isoformat(),
         'rlds_ID': "NEU",
-        'sensor_ID': bacnet_cnx.read(lib.honeywell_301C_ipv4_addr + ":" + lib.BAC0_port + " analogInput " + device_ID + " objectIdentifier"),
-        'sensor_name': bacnet_cnx.read(lib.honeywell_301C_ipv4_addr + ":" + lib.BAC0_port + " analogInput " + device_ID + " objectName"),
-        'ppm': bacnet_cnx.read(lib.honeywell_301C_ipv4_addr + ":" + lib.BAC0_port + " analogInput " + device_ID + " presentValue"),
-        'ppm_status_flags': bacnet_cnx.read(lib.honeywell_301C_ipv4_addr + ":" + lib.BAC0_port + " analogInput " + device_ID + " reliability"),
-        'out_of_service': bacnet_cnx.read(lib.honeywell_301C_ipv4_addr + ":" + lib.BAC0_port + " analogInput " + device_ID + " outOfService"),
+        'sensor_ID': bacnet_cnx.read(
+            lib.honeywell_301C_ipv4_addr + ":" + lib.BAC0_port + " analogInput " + device_ID + " objectIdentifier"),
+        'sensor_name': bacnet_cnx.read(
+            lib.honeywell_301C_ipv4_addr + ":" + lib.BAC0_port + " analogInput " + device_ID + " objectName"),
+        'ppm': bacnet_cnx.read(
+            lib.honeywell_301C_ipv4_addr + ":" + lib.BAC0_port + " analogInput " + device_ID + " presentValue"),
+        'ppm_status_flags': bacnet_cnx.read(
+            lib.honeywell_301C_ipv4_addr + ":" + lib.BAC0_port + " analogInput " + device_ID + " reliability"),
+        'out_of_service': bacnet_cnx.read(
+            lib.honeywell_301C_ipv4_addr + ":" + lib.BAC0_port + " analogInput " + device_ID + " outOfService"),
 
     }
+
 
 def get_spoof_data(bacnet_cnx, device_ID):
     dt = datetime.datetime.now(pytz.timezone('Canada/Pacific')).isoformat()
@@ -45,6 +53,7 @@ def get_spoof_data(bacnet_cnx, device_ID):
         'out_of_service': "false",
 
     }
+
 
 '''
 def generate(stream_name, kinesis_client, bacnet_cnx):
@@ -61,7 +70,6 @@ def generate(stream_name, kinesis_client, bacnet_cnx):
         time.sleep(60)
 '''
 
-
 if __name__ == '__main__':
     print("Starting main.py")
 
@@ -69,13 +77,14 @@ if __name__ == '__main__':
         print("Creating BACnet connection")
         bacnet = BAC0.lite(ip=lib.ipv4_address, port=lib.BAC0_port)
         bacnet.whois()  # Prints 301C's IPv4 192.168.1.72
-        #print(bacnet.devices)
-        #time.sleep(1)
+        # print(bacnet.devices)
+        # time.sleep(1)
         controller = BAC0.device(address=lib.honeywell_301C_ipv4_addr, device_id=1, network=bacnet)
-        #print(controller.points)
+        # print(controller.points)
     except AttributeError as err:
         print(err)
-        print("\nBACNET Attribute Error. Could not initialize BACnet, check variable names are correctly spelled/declared")
+        print("\nBACNET Attribute Error. Could not initialize BACnet, check variable names are correctly "
+              "spelled/declared")
     except BACError.InitializationError as err:
         print(err)
         print("\nBACNET Initialization Error. Check the IP addresses and ports are correct in the ~/lib folder")
@@ -86,10 +95,12 @@ if __name__ == '__main__':
             print(data)
     except BACError.NoResponseFromController as err:
         print(err)
-        print("\nNo Response from controller. It is likely the controller that has disconnected. Double check wired connections and IP addressess")
+        print("\nNo Response from controller. It is likely the controller that has disconnected. Double check wired "
+              "connections and IP addressess")
     except NameError as err:
         print(err)
-        print("\nName Error. It is likely the BACnet connection did not initialize so when we tried to get data there is nothing called 'bacnet'. Double check the initialization of the BACnet cnx")
+        print("\nName Error. It is likely the BACnet connection did not initialize so when we tried to get data there "
+              "is nothing called 'bacnet'. Double check the initialization of the BACnet cnx")
 
     try:
         bucket = "test-bucket"
@@ -127,9 +138,3 @@ if __name__ == '__main__':
 
         time.sleep(60)
     '''
-
-
-
-
-
-
